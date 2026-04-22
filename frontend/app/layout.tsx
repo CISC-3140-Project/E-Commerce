@@ -19,7 +19,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Pawsome | Premium Pet Products',
+  title: 'Petopia | Premium Pet Products',
   description: 'Discover premium pet products crafted with love for your furry companions. Quality food, toys, and accessories for dogs and cats.',
   generator: 'v0.app',
   icons: {

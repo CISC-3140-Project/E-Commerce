@@ -101,10 +101,10 @@ export function Footer() {
         {/* Bottom section */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 lg:flex-row">
           <Link href="/" className="font-serif text-xl font-semibold">
-            Pawsome
+            Petopia
           </Link>
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Pawsome. All rights reserved.
+            &copy; {new Date().getFullYear()} Petopia. All rights reserved.
           </p>
         </div>
       </div>

@@ -166,7 +166,7 @@ export default function HomePage() {
             Ready to Spoil Your Pet?
           </h2>
           <p className="mt-4 text-lg text-primary-foreground/80">
-            Join thousands of happy pet parents who trust Pawsome for their furry family members.
+            Join thousands of happy pet parents who trust Petopia for their furry family members.
           </p>
           <Link href="/products" className="mt-8 inline-block">
             <Button size="lg" variant="secondary" className="bg-background text-foreground hover:bg-background/90">

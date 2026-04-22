@@ -33,7 +33,7 @@ export function Header() {
             <SheetContent side="left" className="w-full max-w-xs">
               <div className="flex flex-col gap-6 py-6">
                 <Link href="/" className="font-serif text-2xl font-semibold tracking-tight">
-                  Pawsome
+                  Petopia
                 </Link>
                 <div className="flex flex-col gap-4">
                   {navigation.map((item) => (
@@ -67,7 +67,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0">
           <span className="font-serif text-2xl font-semibold tracking-tight lg:text-3xl">
-            Pawsome
+            Petopia
           </span>
         </Link>
 
