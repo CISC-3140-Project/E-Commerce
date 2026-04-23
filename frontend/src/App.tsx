@@ -1,4 +1,4 @@
-import { useState } from 'react'
+/*import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -115,6 +115,78 @@ function App() {
       <div className="ticks"></div>
       <section id="spacer"></section>
     </>
+  )
+}
+
+export default App
+*/
+
+import { useEffect, useState } from 'react'
+import './App.css'
+
+type Product = {
+  id: number
+  name: string
+  description: string
+  price: string
+  stock: number
+  image_url: string | null
+  category: string
+}
+
+function App() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:5001/api/products')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch products')
+        }
+        return res.json()
+      })
+      .then((data) => {
+        setProducts(data)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error(err)
+        setError('Could not load products')
+        setLoading(false)
+      })
+  }, [])
+
+  return (
+    <div style={{ padding: '2rem' }}>
+      <h1>Pet Store Products</h1>
+
+      {loading && <p>Loading products...</p>}
+      {error && <p>{error}</p>}
+
+      {!loading && !error && (
+        <div>
+          {products.map((product) => (
+            <div
+              key={product.id}
+              style={{
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                padding: '1rem',
+                marginBottom: '1rem',
+              }}
+            >
+              <h2>{product.name}</h2>
+              <p>{product.description}</p>
+              <p>Category: {product.category}</p>
+              <p>Price: ${product.price}</p>
+              <p>Stock: {product.stock}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
