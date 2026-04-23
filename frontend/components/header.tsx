@@ -20,39 +20,53 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
-        {/* Mobile menu */}
-        <div className="flex lg:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="-m-2.5">
-                <span className="sr-only">Open main menu</span>
-                <Menu className="h-5 w-5" aria-hidden="true" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-full max-w-xs">
-              <div className="flex flex-col gap-6 py-6">
-                <Link href="/" className="font-serif text-2xl font-semibold tracking-tight">
-                  Petopia
-                </Link>
-                <div className="flex flex-col gap-4">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="text-lg font-medium text-foreground/80 transition-colors hover:text-foreground"
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
+      <nav className="mx-auto grid max-w-7xl grid-cols-3 items-center px-4 py-4 lg:px-8">
+        {/* Logo — far left */}
+        <div className="flex items-center">
+          {/* Mobile menu */}
+          <div className="flex lg:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="-m-2.5">
+                  <span className="sr-only">Open main menu</span>
+                  <Menu className="h-5 w-5" aria-hidden="true" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-full max-w-xs">
+                <div className="flex flex-col gap-6 py-6">
+                  <Link href="/" className="font-serif text-2xl font-semibold tracking-tight">
+                    Petopia
+                  </Link>
+                  <div className="flex flex-col gap-4">
+                    {navigation.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className="text-lg font-medium text-foreground/80 transition-colors hover:text-foreground"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
+          <Link href="/" className="hidden lg:block">
+            <span className="font-serif text-2xl font-semibold tracking-tight lg:text-3xl">
+              Petopia
+            </span>
+          </Link>
+          {/* Mobile logo centered via grid */}
+          <Link href="/" className="lg:hidden absolute left-1/2 -translate-x-1/2">
+            <span className="font-serif text-2xl font-semibold tracking-tight">
+              Petopia
+            </span>
+          </Link>
         </div>
 
-        {/* Desktop navigation */}
-        <div className="hidden lg:flex lg:gap-x-8">
+        {/* Desktop navigation — centered */}
+        <div className="hidden lg:flex lg:justify-center lg:gap-x-8">
           {navigation.map((item) => (
             <Link
               key={item.name}
@@ -64,15 +78,11 @@ export function Header() {
           ))}
         </div>
 
-        {/* Logo */}
-        <Link href="/" className="absolute left-1/2 -translate-x-1/2 lg:relative lg:left-0 lg:translate-x-0">
-          <span className="font-serif text-2xl font-semibold tracking-tight lg:text-3xl">
-            Petopia
-          </span>
-        </Link>
+        {/* Empty middle column on mobile */}
+        <div className="lg:hidden" />
 
         {/* Right side actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2">
           <Button
             variant="ghost"
             size="icon"
