@@ -1,19 +1,68 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useNavigate } from "react-router-dom"
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { useCart } from "@/lib/cart-context"
+import { API_BASE } from "@/lib/utils"
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCart()
+  const navigate = useNavigate()
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [checkoutError, setCheckoutError]     = useState("")
 
   const shipping = totalPrice >= 50 ? 0 : 9.99
-  const tax = totalPrice * 0.08
-  const total = totalPrice + shipping + tax
+  const tax      = totalPrice * 0.08
+  const total    = totalPrice + shipping + tax
+
+  async function handleCheckout() {
+    const token = localStorage.getItem("petopia_token")
+    if (!token) {
+      navigate("/login")
+      return
+    }
+
+    setCheckoutLoading(true)
+    setCheckoutError("")
+
+    try {
+      const res = await fetch(`${API_BASE}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            productId: item.id,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          totalPrice: total.toFixed(2),
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setCheckoutError(data.error || "Checkout failed. Please try again.")
+        return
+      }
+
+      clearCart()
+      navigate(`/orders/${data.orderId}`)
+    } catch {
+      setCheckoutError("Could not reach the server. Make sure the backend is running.")
+    } finally {
+      setCheckoutLoading(false)
+    }
+  }
 
   if (items.length === 0) {
     return (
@@ -27,7 +76,7 @@ export default function CartPage() {
               Your cart is empty
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Looks like you haven't added any items to your cart yet.
+              Looks like you haven&apos;t added any items to your cart yet.
             </p>
             <Link href="/products" className="mt-8 inline-block">
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -63,7 +112,6 @@ export default function CartPage() {
             <div className="divide-y divide-border">
               {items.map((item) => (
                 <div key={item.id} className="flex gap-6 py-6">
-                  {/* Image */}
                   <Link
                     href={`/products/${item.id}`}
                     className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-32"
@@ -77,7 +125,6 @@ export default function CartPage() {
                     />
                   </Link>
 
-                  {/* Details */}
                   <div className="flex flex-1 flex-col">
                     <div className="flex justify-between">
                       <div>
@@ -97,34 +144,26 @@ export default function CartPage() {
                     </div>
 
                     <div className="mt-auto flex items-center justify-between">
-                      {/* Quantity */}
                       <div className="flex items-center rounded-lg border border-border">
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-8 text-center text-sm">
-                          {item.quantity}
-                        </span>
+                        <span className="w-8 text-center text-sm">{item.quantity}</span>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
 
-                      {/* Remove */}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -178,11 +217,17 @@ export default function CartPage() {
                 </p>
               )}
 
+              {checkoutError && (
+                <p className="mt-4 text-sm text-destructive">{checkoutError}</p>
+              )}
+
               <Button
                 size="lg"
                 className="mt-6 w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={handleCheckout}
+                disabled={checkoutLoading}
               >
-                Proceed to Checkout
+                {checkoutLoading ? "Placing Order..." : "Proceed to Checkout"}
               </Button>
 
               {/* Promo code */}
@@ -195,7 +240,6 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Continue shopping */}
             <Link
               href="/products"
               className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
