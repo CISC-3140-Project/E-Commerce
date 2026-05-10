@@ -9,7 +9,11 @@ import HomePage from "@/app/page"
 import ProductsPage from "@/app/products/page"
 import CartPage from "@/app/cart/page"
 import SuccessPage from "./routes/Success"
+import LoginPage from "@/app/login/page"
+import AccountPage from "@/app/account/page"
+import OrdersPage from "@/app/orders/page"
 import { ProductPageRoute } from "./routes/ProductPageRoute"
+import { OrderDetailRoute } from "./routes/OrderDetailRoute"
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -22,7 +26,7 @@ function ScrollToTop() {
 export function App() {
   return (
     <CartProvider>
-      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background">
+<div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background">
         <ScrollToTop />
         <Header />
         <main className="flex-grow">
@@ -31,12 +35,13 @@ export function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/products/:id" element={<ProductPageRoute />} />
             <Route path="/cart" element={<CartPage />} />
-            
-            {/* ADDED SUCCESS ROUTE */}
             <Route path="/success" element={<SuccessPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/orders/:id" element={<OrderDetailRoute />} />
           </Routes>
         </main>
-        
         <Footer />
       </div>
     </CartProvider>

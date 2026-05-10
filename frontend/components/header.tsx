@@ -1,20 +1,43 @@
-import { Link } from "react-router-dom"; // Changed from next/link
-import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { ShoppingBag, Search, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useCart } from "@/lib/cart-context";
 
 const navigation = [
   { name: "Shop", href: "/products" },
-  { name: "Dogs", href: "/products?pet=dog" },
-  { name: "Cats", href: "/products?pet=cat" },
   { name: "About", href: "/about" },
 ];
 
+type StoredUser = { name: string; email: string; id: number }
+
 export function Header() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { totalItems } = useCart();
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [user, setUser] = useState<StoredUser | null>(null)
+  const { totalItems } = useCart()
+
+  useEffect(() => {
+    const stored = localStorage.getItem("petopia_user")
+    if (stored) setUser(JSON.parse(stored))
+  }, [])
+
+  function handleSignOut() {
+    localStorage.removeItem("petopia_token")
+    localStorage.removeItem("petopia_user")
+    setUser(null)
+    window.location.href = "/"
+  }
+
+  const firstName = user?.name?.split(" ")[0] ?? ""
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
@@ -82,11 +105,42 @@ export function Header() {
           >
             <Search className="h-5 w-5" />
           </Button>
-
-          <Button variant="ghost" size="icon" className="hidden lg:flex">
-            <User className="h-5 w-5" />
-          </Button>
-
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="hidden lg:flex">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Account</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {user ? (
+                <>
+                  <DropdownMenuLabel className="font-normal">
+                    <span className="font-medium">Hi, {firstName}</span>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/account?section=profile" className="cursor-pointer">My Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/account?section=orders" className="cursor-pointer">My Orders</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    Sign Out
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem asChild>
+                  <Link to="/login" className="cursor-pointer">Sign In</Link>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingBag className="h-5 w-5" />

@@ -1,17 +1,26 @@
 "use client";
 
-const Image = (props: any) => <img {...props} />;
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom"; // Vite/React Router standard
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/lib/cart-context";
-import CheckoutButton from "../../src/components/checkoutButton";
+
+import CheckoutButton from "../../src/components/CheckoutButton";
+
+// Standard Vite image handling (or use a simple <img> tag)
+const Image = (props: any) => <img {...props} />;
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, totalPrice, clearCart } =
     useCart();
+  const navigate = useNavigate();
+
+  // State from the team's branch (useful if you want to show errors/loading)
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
 
   const shipping = totalPrice >= 50 ? 0 : 9.99;
   const tax = totalPrice * 0.08;
@@ -65,7 +74,6 @@ export default function CartPage() {
             <div className="divide-y divide-border">
               {items.map((item) => (
                 <div key={item.id} className="flex gap-6 py-6">
-                  {/* Image */}
                   <Link
                     to={`/products/${item.id}`}
                     className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-32"
@@ -79,7 +87,6 @@ export default function CartPage() {
                     />
                   </Link>
 
-                  {/* Details */}
                   <div className="flex flex-1 flex-col">
                     <div className="flex justify-between">
                       <div>
@@ -99,7 +106,6 @@ export default function CartPage() {
                     </div>
 
                     <div className="mt-auto flex items-center justify-between">
-                      {/* Quantity */}
                       <div className="flex items-center rounded-lg border border-border">
                         <Button
                           variant="ghost"
@@ -126,7 +132,6 @@ export default function CartPage() {
                         </Button>
                       </div>
 
-                      {/* Remove */}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -177,10 +182,16 @@ export default function CartPage() {
                   Add ${(50 - totalPrice).toFixed(2)} more for free shipping
                 </p>
               )}
+              {checkoutError && (
+                <p className="mt-4 text-sm text-red-600">{checkoutError}</p>
+              )}
+
               <div className="mt-6">
+                {/* Keep your Stripe button. 
+                  Ensure 'items' is passed correctly so Stripe knows what's in the cart. 
+                */}
                 <CheckoutButton items={items} />
-              </div>{" "}
-              
+              </div>
               {/* Promo code */}
               <div className="mt-6">
                 <p className="text-sm font-medium">Have a promo code?</p>
@@ -191,7 +202,6 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Continue shopping */}
             <Link
               to="/products"
               className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
