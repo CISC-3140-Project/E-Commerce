@@ -1,19 +1,21 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { useCart } from "@/lib/cart-context"
+const Image = (props: any) => <img {...props} />;
+import { Link } from "react-router-dom";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { useCart } from "@/lib/cart-context";
+import CheckoutButton from "../../src/components/checkoutButton";
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCart()
+  const { items, updateQuantity, removeItem, totalPrice, clearCart } =
+    useCart();
 
-  const shipping = totalPrice >= 50 ? 0 : 9.99
-  const tax = totalPrice * 0.08
-  const total = totalPrice + shipping + tax
+  const shipping = totalPrice >= 50 ? 0 : 9.99;
+  const tax = totalPrice * 0.08;
+  const total = totalPrice + shipping + tax;
 
   if (items.length === 0) {
     return (
@@ -29,7 +31,7 @@ export default function CartPage() {
             <p className="mt-2 text-muted-foreground">
               Looks like you haven't added any items to your cart yet.
             </p>
-            <Link href="/products" className="mt-8 inline-block">
+            <Link to="/products" className="mt-8 inline-block">
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Start Shopping
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -38,7 +40,7 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -65,7 +67,7 @@ export default function CartPage() {
                 <div key={item.id} className="flex gap-6 py-6">
                   {/* Image */}
                   <Link
-                    href={`/products/${item.id}`}
+                    to={`/products/${item.id}`}
                     className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-32"
                   >
                     <Image
@@ -85,7 +87,7 @@ export default function CartPage() {
                           {item.category}
                         </p>
                         <Link
-                          href={`/products/${item.id}`}
+                          to={`/products/${item.id}`}
                           className="mt-1 font-medium hover:underline"
                         >
                           {item.name}
@@ -145,7 +147,6 @@ export default function CartPage() {
           <div className="mt-8 lg:col-span-5 lg:mt-0">
             <div className="rounded-lg border border-border bg-card p-6">
               <h2 className="text-lg font-semibold">Order Summary</h2>
-
               <div className="mt-6 space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
@@ -171,20 +172,15 @@ export default function CartPage() {
                   <span>${total.toFixed(2)}</span>
                 </div>
               </div>
-
               {shipping > 0 && (
                 <p className="mt-4 text-sm text-muted-foreground">
                   Add ${(50 - totalPrice).toFixed(2)} more for free shipping
                 </p>
               )}
-
-              <Button
-                size="lg"
-                className="mt-6 w-full bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                Proceed to Checkout
-              </Button>
-
+              <div className="mt-6">
+                <CheckoutButton items={items} />
+              </div>{" "}
+              
               {/* Promo code */}
               <div className="mt-6">
                 <p className="text-sm font-medium">Have a promo code?</p>
@@ -197,7 +193,7 @@ export default function CartPage() {
 
             {/* Continue shopping */}
             <Link
-              href="/products"
+              to="/products"
               className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowRight className="h-4 w-4 rotate-180" />
@@ -207,5 +203,5 @@ export default function CartPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

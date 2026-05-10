@@ -8,6 +8,7 @@ import "@/app/globals.css"
 import HomePage from "@/app/page"
 import ProductsPage from "@/app/products/page"
 import CartPage from "@/app/cart/page"
+import SuccessPage from "./routes/Success"
 import { ProductPageRoute } from "./routes/ProductPageRoute"
 
 function ScrollToTop() {
@@ -21,18 +22,23 @@ function ScrollToTop() {
 export function App() {
   return (
     <CartProvider>
-      <ScrollToTop />
-      <Header />
-      <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/products/:id" element={<ProductPageRoute />} />
-          <Route path="/cart" element={<CartPage />} />
-        </Routes>
-      </main>
-      <Footer />
+      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background">
+        <ScrollToTop />
+        <Header />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/:id" element={<ProductPageRoute />} />
+            <Route path="/cart" element={<CartPage />} />
+            
+            {/* ADDED SUCCESS ROUTE */}
+            <Route path="/success" element={<SuccessPage />} />
+          </Routes>
+        </main>
+        
+        <Footer />
+      </div>
     </CartProvider>
   )
 }
-

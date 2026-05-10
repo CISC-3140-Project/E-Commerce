@@ -1,3 +1,4 @@
+/*
 import type { Metadata } from 'next'
 import { Playfair_Display, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
@@ -59,3 +60,4 @@ export default function RootLayout({
     </html>
   )
 }
+*/

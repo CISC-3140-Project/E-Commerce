@@ -1,42 +1,83 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const express = require('express');
-const cors = require('cors');
-const pool = require('./db/connection');
+const express = require("express");
+const cors = require("cors");
+const pool = require("./db/connection");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // During development, this is the safest way to ensure Safari connects
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+  }),
+);
 app.use(express.json());
 
-app.get('/api/data', (req, res) => {
-  res.json({ message: 'Hello from the backend!' });
+app.get("/api/data", (req, res) => {
+  res.json({ message: "Hello from the backend!" });
 });
 
-app.get('/api/test-db', async (req, res) => {
+app.get("/api/test-db", async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()');
+    const result = await pool.query("SELECT NOW()");
     res.json({
-      message: 'Database connected successfully',
+      message: "Database connected successfully",
       time: result.rows[0],
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Database connection failed' });
+    res.status(500).json({ error: "Database connection failed" });
   }
 });
 
-app.get('/api/products', async (req, res) => {
+app.get("/api/products", async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM products ORDER BY id');
+    const result = await pool.query("SELECT * FROM products ORDER BY id");
     res.json(result.rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
+app.post("/api/create-checkout-session", async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    // Safety check: Make sure items exist and isn't empty
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: "No items in cart" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: items.map((item) => ({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: item.name,
+            // Add images here if your frontend sends them: images: [item.image]
+          },
+          // FIX: Use parseFloat and Math.round to ensure it's a valid integer (cents)
+          unit_amount: Math.round(parseFloat(item.price) * 100),
+        },
+        quantity: item.quantity || 1,
+      })),
+      mode: "payment",
+      success_url: "http://localhost:3000/success",
+      cancel_url: "http://localhost:3000/cart",
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error("Stripe Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`port is running on ${PORT}`);
 });

@@ -1,48 +1,47 @@
-"use client"
-
-import Link from "next/link"
-import { useState } from "react"
-import { ShoppingBag, Search, Menu, X, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useCart } from "@/lib/cart-context"
+import { Link } from "react-router-dom"; // Changed from next/link
+import { useState } from "react";
+import { ShoppingBag, Search, Menu, X, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useCart } from "@/lib/cart-context";
 
 const navigation = [
   { name: "Shop", href: "/products" },
   { name: "Dogs", href: "/products?pet=dog" },
   { name: "Cats", href: "/products?pet=cat" },
   { name: "About", href: "/about" },
-]
+];
 
 export function Header() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const { totalItems } = useCart()
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { totalItems } = useCart();
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="mx-auto grid max-w-7xl grid-cols-3 items-center px-4 py-4 lg:px-8">
-        {/* Logo — far left */}
-        <div className="flex items-center">
-          {/* Mobile menu */}
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+      {/* The 'flex' instead of 'grid' here is better for Safari. 
+        'max-w-full' and 'overflow-hidden' ensure nothing slides off-screen.
+      */}
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8 overflow-hidden">
+        {/* 1. Left Section (Logo & Mobile Menu) */}
+        <div className="flex flex-1 items-center">
           <div className="flex lg:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="-m-2.5">
-                  <span className="sr-only">Open main menu</span>
+                <Button variant="ghost" size="icon" className="mr-2">
                   <Menu className="h-5 w-5" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-full max-w-xs">
+              <SheetContent side="left" className="w-[300px]">
                 <div className="flex flex-col gap-6 py-6">
-                  <Link href="/" className="font-serif text-2xl font-semibold tracking-tight">
+                  <Link to ="/" className="font-serif text-2xl font-semibold">
                     Petopia
                   </Link>
                   <div className="flex flex-col gap-4">
                     {navigation.map((item) => (
                       <Link
                         key={item.name}
-                        href={item.href}
-                        className="text-lg font-medium text-foreground/80 transition-colors hover:text-foreground"
+                        to={item.href}
+                        className="text-lg font-medium"
                       >
                         {item.name}
                       </Link>
@@ -52,37 +51,29 @@ export function Header() {
               </SheetContent>
             </Sheet>
           </div>
-          <Link href="/" className="hidden lg:block">
+
+          <Link to="/" className="shrink-0">
             <span className="font-serif text-2xl font-semibold tracking-tight lg:text-3xl">
-              Petopia
-            </span>
-          </Link>
-          {/* Mobile logo centered via grid */}
-          <Link href="/" className="lg:hidden absolute left-1/2 -translate-x-1/2">
-            <span className="font-serif text-2xl font-semibold tracking-tight">
               Petopia
             </span>
           </Link>
         </div>
 
-        {/* Desktop navigation — centered */}
-        <div className="hidden lg:flex lg:justify-center lg:gap-x-8">
+        {/* 2. Middle Section (Desktop Links) */}
+        <div className="hidden lg:flex lg:gap-x-8 flex-initial">
           {navigation.map((item) => (
             <Link
               key={item.name}
-              href={item.href}
-              className="text-sm font-medium uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
+              to={item.href}
+              className="text-sm font-medium uppercase tracking-wider text-foreground/70 hover:text-foreground transition-colors"
             >
               {item.name}
             </Link>
           ))}
         </div>
 
-        {/* Empty middle column on mobile */}
-        <div className="lg:hidden" />
-
-        {/* Right side actions */}
-        <div className="flex items-center justify-end gap-2">
+        {/* 3. Right Section (Icons) */}
+        <div className="flex flex-1 items-center justify-end gap-2 shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -90,21 +81,20 @@ export function Header() {
             className="hidden lg:flex"
           >
             <Search className="h-5 w-5" />
-            <span className="sr-only">Search</span>
           </Button>
+
           <Button variant="ghost" size="icon" className="hidden lg:flex">
             <User className="h-5 w-5" />
-            <span className="sr-only">Account</span>
           </Button>
-          <Link href="/cart">
+
+          <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingBag className="h-5 w-5" />
               {totalItems > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-accent-foreground">
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
                   {totalItems}
                 </span>
               )}
-              <span className="sr-only">Cart</span>
             </Button>
           </Link>
         </div>
@@ -112,21 +102,25 @@ export function Header() {
 
       {/* Search overlay */}
       {isSearchOpen && (
-        <div className="border-t border-border bg-background px-4 py-4 lg:px-8">
+        <div className="border-t bg-background px-4 py-4 lg:px-8">
           <div className="mx-auto flex max-w-xl items-center gap-4">
             <Search className="h-5 w-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search for products..."
-              className="flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground"
+              placeholder="Search products..."
+              className="flex-1 bg-transparent text-lg outline-none"
               autoFocus
             />
-            <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSearchOpen(false)}
+            >
               <X className="h-5 w-5" />
             </Button>
           </div>
         </div>
       )}
     </header>
-  )
+  );
 }
