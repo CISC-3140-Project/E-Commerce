@@ -1,3 +1,43 @@
+// Raw shape returned by the Express API — matches schema.sql exactly
+export interface ApiProduct {
+  id: number
+  name: string
+  description: string | null
+  price: string
+  stock: number
+  image: string | null
+  category: string
+  pet_type: string | null
+  rating: string | null
+  reviews: number | null
+  in_stock: boolean
+  featured: boolean
+  badge: string | null
+}
+
+export function mapApiProduct(p: ApiProduct): Product {
+  // Convert pet_type column to animals array used by the UI
+  let animals: string[] = []
+  if (p.pet_type === "dog") animals = ["dog"]
+  else if (p.pet_type === "cat") animals = ["cat"]
+  else if (p.pet_type === "both") animals = ["dog", "cat"]
+
+  return {
+    id: String(p.id),
+    name: p.name,
+    description: p.description ?? "",
+    price: parseFloat(p.price),
+    image: p.image ?? "",
+    category: p.category as Product["category"],
+    animals,
+    rating: p.rating ? parseFloat(p.rating) : 0,
+    reviews: p.reviews ?? 0,
+    inStock: p.in_stock,
+    featured: p.featured,
+    badge: p.badge ?? undefined,
+  }
+}
+
 export interface Product {
   id: string
   name: string

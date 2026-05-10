@@ -1,12 +1,44 @@
+"use client"
+
+import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/product-card"
-import { getFeaturedProducts, categories } from "@/lib/products"
+import { mapApiProduct, type ApiProduct, type Product } from "@/lib/products"
+import { API_BASE } from "@/lib/utils"
+
+const CATEGORY_DEFS = [
+  { name: "Food",        slug: "food"        },
+  { name: "Toys",        slug: "toys"        },
+  { name: "Accessories", slug: "accessories" },
+  { name: "Beds",        slug: "beds"        },
+  { name: "Grooming",    slug: "grooming"    },
+]
 
 export default function HomePage() {
-  const featuredProducts = getFeaturedProducts()
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    fetch(`${API_BASE}/products`)
+      .then((r) => r.json())
+      .then((data: ApiProduct[]) => setAllProducts(data.map(mapApiProduct)))
+      .catch(console.error)
+  }, [])
+
+  const featuredProducts = useMemo(
+    () => allProducts.filter((p) => p.featured).slice(0, 4),
+    [allProducts]
+  )
+
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const p of allProducts) {
+      counts.set(p.category, (counts.get(p.category) ?? 0) + 1)
+    }
+    return CATEGORY_DEFS.map((c) => ({ ...c, count: counts.get(c.slug) ?? 0 }))
+  }, [allProducts])
 
   return (
     <div className="min-h-screen">
@@ -29,11 +61,6 @@ export default function HomePage() {
                   <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                     Shop Collection
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/about">
-                  <Button size="lg" variant="outline">
-                    Our Story
                   </Button>
                 </Link>
               </div>
@@ -72,7 +99,7 @@ export default function HomePage() {
               >
                 <h3 className="text-lg font-medium">{category.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {category.count} products
+                  {category.count > 0 ? `${category.count} products` : "Coming soon"}
                 </p>
                 <ArrowRight className="mt-4 h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
               </Link>
@@ -101,11 +128,21 @@ export default function HomePage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+
+          {featuredProducts.length > 0 ? (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="animate-pulse rounded-lg bg-muted aspect-[3/4]" />
+              ))}
+            </div>
+          )}
+
           <div className="mt-8 text-center sm:hidden">
             <Link href="/products">
               <Button variant="outline">
@@ -129,7 +166,7 @@ export default function HomePage() {
               </div>
               <h3 className="mt-6 text-lg font-semibold">Made with Love</h3>
               <p className="mt-2 text-muted-foreground">
-                Every product is crafted with care and designed with your pet's happiness in mind.
+                Every product is crafted with care and designed with your pet&apos;s happiness in mind.
               </p>
             </div>
             <div className="text-center">

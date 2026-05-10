@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import Link from "next/link"
-import { User, Package, Heart } from "lucide-react"
+import { User, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { OrderStatusBadge } from "@/components/order-status-badge"
 import { useRequireAuth } from "@/lib/use-require-auth"
-import { useCart } from "@/lib/cart-context"
 import { API_BASE, formatDate } from "@/lib/utils"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -24,23 +23,11 @@ type UserProfile = {
 type OrderItem = { name: string; quantity: number; price: string }
 type Order = { id: number; status: string; created_at: string; items: OrderItem[] }
 
-type WishlistProduct = {
-  id: number
-  name: string
-  price: string
-  image: string | null
-  category: string
-  rating: number | null
-  reviews: number | null
-  badge: string | null
-}
-
 // ─── Sidebar nav ──────────────────────────────────────────────────────────────
 
 const navItems = [
-  { key: "profile", label: "Profile",    Icon: User    },
-  { key: "orders",  label: "Orders",     Icon: Package },
-  { key: "saved",   label: "Saved",      Icon: Heart   },
+  { key: "profile", label: "Profile", Icon: User    },
+  { key: "orders",  label: "Orders",  Icon: Package },
 ]
 
 // ─── Profile section ──────────────────────────────────────────────────────────
@@ -245,104 +232,6 @@ function OrdersSection({ token }: { token: string }) {
   )
 }
 
-// ─── Saved section ────────────────────────────────────────────────────────────
-
-function SavedSection({ token }: { token: string }) {
-  const { addItem }           = useCart()
-  const [items, setItems]     = useState<WishlistProduct[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState("")
-
-  useEffect(() => {
-    fetch(`${API_BASE}/account/wishlist`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) setError(data.error)
-        else setItems(data)
-        setLoading(false)
-      })
-      .catch(() => { setError("Could not load saved items."); setLoading(false) })
-  }, [token])
-
-  function remove(productId: number) {
-    fetch(`${API_BASE}/account/wishlist/${productId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    setItems((prev) => prev.filter((p) => p.id !== productId))
-  }
-
-  return (
-    <div>
-      <h2 className="font-serif text-xl font-semibold mb-6">Saved Items</h2>
-
-      {loading && <p className="text-muted-foreground">Loading saved items...</p>}
-      {error   && <p className="text-destructive">{error}</p>}
-
-      {!loading && !error && items.length === 0 && (
-        <div className="rounded-lg border border-border bg-card p-12 text-center">
-          <Heart className="mx-auto h-10 w-10 text-muted-foreground" />
-          <p className="mt-4 text-muted-foreground">No saved items yet</p>
-          <Link href="/products" className="mt-2 inline-block text-sm font-medium hover:text-accent">
-            Browse products →
-          </Link>
-        </div>
-      )}
-
-      {!loading && !error && items.length > 0 && (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((product) => (
-            <div key={product.id} className="group rounded-lg border border-border bg-card overflow-hidden">
-              <div className="relative aspect-square bg-muted overflow-hidden">
-                {product.image ? (
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-secondary" />
-                )}
-                {product.badge && (
-                  <span className="absolute left-3 top-3 rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-                    {product.badge}
-                  </span>
-                )}
-              </div>
-              <div className="p-4">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">{product.category}</p>
-                <h3 className="mt-1 font-medium">{product.name}</h3>
-                <p className="mt-1 font-semibold">${parseFloat(product.price).toFixed(2)}</p>
-                <div className="mt-3 flex gap-2">
-                  <Button
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => addItem({
-                      id: String(product.id),
-                      name: product.name,
-                      price: parseFloat(product.price),
-                      image: product.image ?? "",
-                      category: product.category,
-                    })}
-                  >
-                    Add to Cart
-                  </Button>
-                  <Button size="sm" variant="ghost"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => remove(product.id)}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AccountPage() {
@@ -407,7 +296,6 @@ export default function AccountPage() {
           <div className="flex-1 min-w-0">
             {token && section === "profile" && <ProfileSection token={token} />}
             {token && section === "orders"  && <OrdersSection  token={token} />}
-            {token && section === "saved"   && <SavedSection   token={token} />}
           </div>
         </div>
       </div>

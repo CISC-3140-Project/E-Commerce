@@ -136,9 +136,6 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/account?section=orders" className="cursor-pointer">My Orders</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/account?section=saved" className="cursor-pointer">Saved</Link>
-                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleSignOut}

@@ -10,6 +10,7 @@ import ProductsPage from "@/app/products/page"
 import CartPage from "@/app/cart/page"
 import LoginPage from "@/app/login/page"
 import AccountPage from "@/app/account/page"
+import OrdersPage from "@/app/orders/page"
 import { ProductPageRoute } from "./routes/ProductPageRoute"
 import { OrderDetailRoute } from "./routes/OrderDetailRoute"
 
@@ -34,6 +35,7 @@ export function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
           <Route path="/orders/:id" element={<OrderDetailRoute />} />
         </Routes>
       </main>

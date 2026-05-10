@@ -206,81 +206,74 @@ app.put('/api/account/password', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/api/account/wishlist', requireAuth, async (req, res) => {
+
+app.get('/api/products/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT p.id, p.name, p.price, p.image, p.category, p.rating, p.reviews, p.badge
-       FROM wishlist w
-       JOIN products p ON p.id = w.product_id
-       WHERE w.user_id = $1
-       ORDER BY w.created_at DESC`,
-      [req.user.userId]
+      'SELECT * FROM products WHERE id = $1',
+      [req.params.id]
     );
-    res.json(result.rows);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    res.json(result.rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message || 'Failed to fetch wishlist' });
+    res.status(500).json({ error: error.message || 'Failed to fetch product' });
   }
 });
 
-app.post('/api/account/wishlist', requireAuth, async (req, res) => {
-  const { productId } = req.body;
-  if (!productId) return res.status(400).json({ error: 'Product ID is required' });
-  try {
-    await pool.query(
-      'INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-      [req.user.userId, productId]
-    );
-    res.status(201).json({ message: 'Added to wishlist' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message || 'Failed to add to wishlist' });
+app.post('/api/orders', requireAuth, async (req, res) => {
+  const { items, totalPrice } = req.body;
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'Order must contain at least one item' });
   }
-});
-
-app.delete('/api/account/wishlist/:productId', requireAuth, async (req, res) => {
+  const client = await pool.connect();
   try {
-    await pool.query(
-      'DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2',
-      [req.user.userId, req.params.productId]
+    await client.query('BEGIN');
+    const orderResult = await client.query(
+      'INSERT INTO orders (user_id, total_price, status) VALUES ($1, $2, $3) RETURNING id',
+      [req.user.userId, totalPrice, 'pending']
     );
-    res.json({ message: 'Removed from wishlist' });
+    const orderId = orderResult.rows[0].id;
+    for (const item of items) {
+      await client.query(
+        'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)',
+        [orderId, parseInt(item.productId), item.quantity, item.price]
+      );
+    }
+    await client.query('COMMIT');
+    res.status(201).json({ orderId });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error(error);
-    res.status(500).json({ error: error.message || 'Failed to remove from wishlist' });
+    res.status(500).json({ error: error.message || 'Failed to create order' });
+  } finally {
+    client.release();
   }
 });
 
 app.get('/api/products', async (req, res) => {
   try {
-    const { animal, category } = req.query;
-
-    let query = `
-      SELECT p.*,
-        COALESCE(array_agg(at.name) FILTER (WHERE at.name IS NOT NULL), '{}') AS animals
-      FROM products p
-      LEFT JOIN product_animal_types pat ON pat.product_id = p.id
-      LEFT JOIN animal_types at ON at.id = pat.animal_type_id
-    `;
+    const { pet_type, category } = req.query;
+    const conditions = [];
     const params = [];
 
-    if (animal) {
-      params.push(animal);
-      query += ` WHERE p.id IN (
-        SELECT pat2.product_id FROM product_animal_types pat2
-        JOIN animal_types at2 ON at2.id = pat2.animal_type_id
-        WHERE at2.name = $${params.length}
-      )`;
+    if (pet_type) {
+      params.push(pet_type);
+      conditions.push(`pet_type = $${params.length}`);
     }
 
     if (category) {
       params.push(category);
-      query += ` ${animal ? 'AND' : 'WHERE'} p.category = $${params.length}`;
+      conditions.push(`category = $${params.length}`);
     }
 
-    query += ' GROUP BY p.id ORDER BY p.id';
-
-    const result = await pool.query(query, params);
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const result = await pool.query(
+      `SELECT * FROM products ${where} ORDER BY id`,
+      params
+    );
     res.json(result.rows);
   } catch (error) {
     console.error(error);

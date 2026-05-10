@@ -1,16 +1,16 @@
 "use client"
 
-import { use, useState } from "react"
+import { use, useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { notFound } from "next/navigation"
 import { Star, Minus, Plus, Truck, ShieldCheck, RotateCcw, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductCard } from "@/components/product-card"
-import { getProductById, products } from "@/lib/products"
+import { mapApiProduct, type ApiProduct, type Product } from "@/lib/products"
 import { useCart } from "@/lib/cart-context"
+import { API_BASE } from "@/lib/utils"
 
 interface ProductPageProps {
   params: Promise<{ id: string }>
@@ -18,19 +18,44 @@ interface ProductPageProps {
 
 export default function ProductPage({ params }: ProductPageProps) {
   const { id } = use(params)
-  const product = getProductById(id)
-  const [quantity, setQuantity] = useState(1)
   const { addItem } = useCart()
 
-  if (!product) {
-    notFound()
-  }
+  const [product, setProduct]               = useState<Product | null>(null)
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+  const [loading, setLoading]               = useState(true)
+  const [notFound, setNotFound]             = useState(false)
+  const [quantity, setQuantity]             = useState(1)
 
-  const relatedProducts = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4)
+  useEffect(() => {
+    setLoading(true)
+    setNotFound(false)
+    setProduct(null)
+    setRelatedProducts([])
+
+    fetch(`${API_BASE}/products/${id}`)
+      .then((res) => {
+        if (res.status === 404) { setNotFound(true); setLoading(false); return null }
+        if (!res.ok) throw new Error("Failed to fetch product")
+        return res.json()
+      })
+      .then((data: ApiProduct | null) => {
+        if (!data) return
+        const p = mapApiProduct(data)
+        setProduct(p)
+        return fetch(`${API_BASE}/products?category=${p.category}`)
+          .then((r) => r.json())
+          .then((all: ApiProduct[]) => {
+            setRelatedProducts(
+              all.filter((ap) => String(ap.id) !== id).slice(0, 4).map(mapApiProduct)
+            )
+          })
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false))
+  }, [id])
 
   const handleAddToCart = () => {
+    if (!product) return
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: product.id,
@@ -40,6 +65,36 @@ export default function ProductPage({ params }: ProductPageProps) {
         category: product.category,
       })
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-8 lg:py-12">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8">
+          <div className="animate-pulse lg:grid lg:grid-cols-2 lg:gap-16">
+            <div className="aspect-square rounded-lg bg-muted" />
+            <div className="mt-8 space-y-4 lg:mt-0">
+              <div className="h-4 w-24 rounded bg-muted" />
+              <div className="h-8 w-3/4 rounded bg-muted" />
+              <div className="h-4 w-32 rounded bg-muted" />
+              <div className="h-10 w-28 rounded bg-muted" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (notFound || !product) {
+    return (
+      <div className="min-h-screen py-20 text-center">
+        <h1 className="font-serif text-3xl font-semibold">Product not found</h1>
+        <Link href="/products" className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <ChevronLeft className="h-4 w-4" />
+          Back to Products
+        </Link>
+      </div>
+    )
   }
 
   return (
@@ -60,14 +115,18 @@ export default function ProductPage({ params }: ProductPageProps) {
         <div className="lg:grid lg:grid-cols-2 lg:gap-16">
           {/* Image */}
           <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
+            {product.image ? (
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            ) : (
+              <div className="h-full w-full bg-secondary" />
+            )}
             {product.badge && (
               <Badge
                 className={`absolute left-4 top-4 ${
@@ -157,8 +216,9 @@ export default function ProductPage({ params }: ProductPageProps) {
                 size="lg"
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 sm:flex-none"
                 onClick={handleAddToCart}
+                disabled={!product.inStock}
               >
-                Add to Cart
+                {product.inStock ? "Add to Cart" : "Out of Stock"}
               </Button>
             </div>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import { SlidersHorizontal, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -23,20 +23,29 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { ProductCard } from "@/components/product-card"
-import { products, categories } from "@/lib/products"
+import { mapApiProduct, type ApiProduct, type Product } from "@/lib/products"
+import { API_BASE } from "@/lib/utils"
+
+const CATEGORY_DEFS = [
+  { name: "Food",        slug: "food"        },
+  { name: "Toys",        slug: "toys"        },
+  { name: "Accessories", slug: "accessories" },
+  { name: "Beds",        slug: "beds"        },
+  { name: "Grooming",    slug: "grooming"    },
+]
 
 const petTypes = [
-  { id: "",    label: "All" },
+  { id: "",    label: "All"  },
   { id: "dog", label: "Dogs" },
   { id: "cat", label: "Cats" },
 ]
 
 const sortOptions = [
-  { value: "featured",   label: "Featured" },
+  { value: "featured",   label: "Featured"           },
   { value: "price-asc",  label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
-  { value: "rating",     label: "Top Rated" },
-  { value: "newest",     label: "Newest" },
+  { value: "rating",     label: "Top Rated"          },
+  { value: "newest",     label: "Newest"             },
 ]
 
 export default function ProductsPage() {
@@ -44,14 +53,44 @@ export default function ProductsPage() {
   const initialCategory = searchParams.get("category") || ""
   const initialPet      = searchParams.get("pet")      || ""
 
+  const [allProducts, setAllProducts]         = useState<Product[]>([])
+  const [loading, setLoading]                 = useState(true)
+  const [error, setError]                     = useState("")
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initialCategory ? [initialCategory] : []
   )
   const [selectedPet, setSelectedPet] = useState<string>(initialPet)
   const [sortBy, setSortBy]           = useState("featured")
 
+  useEffect(() => {
+    fetch(`${API_BASE}/products`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch products")
+        return res.json()
+      })
+      .then((data: ApiProduct[]) => {
+        setAllProducts(data.map(mapApiProduct))
+        setLoading(false)
+      })
+      .catch(() => {
+        setError("Could not load products. Make sure the backend is running.")
+        setLoading(false)
+      })
+  }, [])
+
+  // Compute category counts from live data
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const p of allProducts) {
+      counts.set(p.category, (counts.get(p.category) ?? 0) + 1)
+    }
+    return CATEGORY_DEFS
+      .filter((c) => counts.has(c.slug))
+      .map((c) => ({ ...c, count: counts.get(c.slug)! }))
+  }, [allProducts])
+
   const filteredProducts = useMemo(() => {
-    let filtered = [...products]
+    let filtered = [...allProducts]
 
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((p) => selectedCategories.includes(p.category))
@@ -70,7 +109,7 @@ export default function ProductsPage() {
     }
 
     return filtered
-  }, [selectedCategories, selectedPet, sortBy])
+  }, [allProducts, selectedCategories, selectedPet, sortBy])
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -106,7 +145,7 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Pet type — single select */}
+      {/* Pet type */}
       <div>
         <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
           Pet Type
@@ -138,6 +177,8 @@ export default function ProductsPage() {
           </p>
         </div>
 
+        {error && <p className="mb-6 text-destructive">{error}</p>}
+
         {/* Active filter chips */}
         {hasFilters && (
           <div className="mb-6 flex flex-wrap items-center gap-2">
@@ -149,7 +190,7 @@ export default function ProductsPage() {
                 className="cursor-pointer gap-1"
                 onClick={() => toggleCategory(cat)}
               >
-                {categories.find((c) => c.slug === cat)?.name}
+                {categories.find((c) => c.slug === cat)?.name ?? cat}
                 <X className="h-3 w-3" />
               </Badge>
             ))}
@@ -172,7 +213,6 @@ export default function ProductsPage() {
         {/* Toolbar */}
         <div className="mb-8 flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-4">
-            {/* Mobile filter trigger */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" className="lg:hidden">
@@ -189,7 +229,9 @@ export default function ProductsPage() {
                 </div>
               </SheetContent>
             </Sheet>
-            <p className="text-sm text-muted-foreground">{filteredProducts.length} products</p>
+            <p className="text-sm text-muted-foreground">
+              {loading ? "Loading..." : `${filteredProducts.length} products`}
+            </p>
           </div>
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-48">
@@ -214,7 +256,13 @@ export default function ProductsPage() {
 
           {/* Product grid */}
           <div>
-            {filteredProducts.length > 0 ? (
+            {loading ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="animate-pulse rounded-lg bg-muted aspect-square" />
+                ))}
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
