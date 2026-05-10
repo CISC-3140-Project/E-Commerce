@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5001;
 
 app.use(
   cors({
-    origin: "*", // During development, this is the safest way to ensure Safari connects
+    origin: "*",
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   }),
@@ -60,9 +60,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
           currency: "usd",
           product_data: {
             name: item.name,
-            // Add images here if your frontend sends them: images: [item.image]
           },
-          // FIX: Use parseFloat and Math.round to ensure it's a valid integer (cents)
           unit_amount: Math.round(parseFloat(item.price) * 100),
         },
         quantity: item.quantity || 1,
