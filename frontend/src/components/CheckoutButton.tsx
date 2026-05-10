@@ -14,7 +14,6 @@ interface CheckoutButtonProps {
 
 const CheckoutButton: React.FC<CheckoutButtonProps> = ({ items }) => {
   const handleCheckout = async () => {
-    // 1. Safety check to make sure the cart isn't empty
     if (items.length === 0) {
       alert("Your cart is empty!");
       return;
@@ -23,7 +22,6 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({ items }) => {
     console.log("Sending items to backend:", items);
 
     try {
-      // 2. Attempt to hit your Node.js backend on Port 5001
       const response = await fetch('http://localhost:5001/api/create-checkout-session', {
         method: 'POST',
         headers: { 
@@ -32,7 +30,6 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({ items }) => {
         body: JSON.stringify({ items }),
       });
 
-      // 3. Check if the server responded with an error (like 500 or 404)
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("Server Error Detail:", errorData);
@@ -41,14 +38,12 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({ items }) => {
 
       const data = await response.json();
 
-      // 4. Redirect to Stripe if the URL is present
       if (data.url) {
         window.location.href = data.url;
       } else {
         alert("Checkout error: The server didn't return a checkout URL.");
       }
     } catch (err) {
-      // 5. Catch network errors (like the backend being offline)
       console.error("Checkout Connection Error:", err);
       alert("Backend is not responding. Please ensure your server is running on port 5001.");
     }
