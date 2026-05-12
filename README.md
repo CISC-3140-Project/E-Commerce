@@ -53,12 +53,14 @@ VALUES
 
 To install it locally:
 1) **Frontend:**
+
    run:
    ```bash
    cd frontend
    npm install
     ```
-2) **Backend:**
+3) **Backend:**
+
    run:
    ```bash
     cd ../backend
@@ -82,11 +84,13 @@ The Stripe Public Key is currently hardcoded in frontend/src/components/Carts.js
 Once the dependencies are installed, follow these steps to start the development servers. Note: You will need two terminal windows open.
 * **Start the Backend:**
    * If you are already in the backend directory:
+
      run:
       ```bash
       npm run dev
       ```
   * If you are starting from the root of the project:
+
     run:
      ```bash
      cd backend
@@ -98,11 +102,13 @@ Once the dependencies are installed, follow these steps to start the development
 
 * **Start the Frontend:**
    * If you are already in the frontend directory:
+
      run:
       ```bash
       npm run dev
       ```
    * If you are starting from the root of the project
+
      run:
       ```bash
       cd frontend
