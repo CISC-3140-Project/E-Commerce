@@ -52,6 +52,7 @@ export default function ProductsPage() {
   const searchParams = useSearchParams()
   const initialCategory = searchParams.get("category") || ""
   const initialPet      = searchParams.get("pet")      || ""
+  const initialSearch   = searchParams.get("search")   || ""
 
   const [allProducts, setAllProducts]         = useState<Product[]>([])
   const [loading, setLoading]                 = useState(true)
@@ -61,6 +62,7 @@ export default function ProductsPage() {
   )
   const [selectedPet, setSelectedPet] = useState<string>(initialPet)
   const [sortBy, setSortBy]           = useState("featured")
+  const [searchQuery, setSearchQuery]   = useState("")
 
   useEffect(() => {
     fetch(`${API_BASE}/products`)
@@ -78,6 +80,11 @@ export default function ProductsPage() {
       })
   }, [])
 
+  useEffect(() => {
+  const s = searchParams.get("search") || ""
+  setSearchQuery(s)
+}, [searchParams])
+
   // Compute category counts from live data
   const categories = useMemo(() => {
     const counts = new Map<string, number>()
@@ -91,6 +98,13 @@ export default function ProductsPage() {
 
   const filteredProducts = useMemo(() => {
     let filtered = [...allProducts]
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      filtered = filtered.filter(
+        (p) => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
+      )
+    }
 
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((p) => selectedCategories.includes(p.category))
@@ -109,7 +123,7 @@ export default function ProductsPage() {
     }
 
     return filtered
-  }, [allProducts, selectedCategories, selectedPet, sortBy])
+  }, [allProducts, selectedCategories, selectedPet, sortBy, searchQuery])
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -270,10 +284,21 @@ export default function ProductsPage() {
               </div>
             ) : (
               <div className="py-20 text-center">
-                <p className="text-lg font-medium">No products found</p>
-                <p className="mt-2 text-muted-foreground">
-                  Try adjusting your filters to find what you&apos;re looking for.
+                <p className="text-lg font-medium"> 
+                  {searchQuery ? `No products found for "${searchQuery}"` : "No products found with the selected filters."}
                 </p>
+                <p className="mt-2 text-muted-foreground">
+                  Try adjusting your filters to find what you're looking for.
+                </p>
+                {searchQuery && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => setSearchQuery("")}
+                    className="mt-4"
+                  >
+                    Clear search
+                  </Button>
+                )}
                 <Button variant="outline" onClick={clearFilters} className="mt-4">
                   Clear filters
                 </Button>

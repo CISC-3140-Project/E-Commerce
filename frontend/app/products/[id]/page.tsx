@@ -32,7 +32,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     setProduct(null)
     setRelatedProducts([])
 
-    fetch(`${API_BASE}/products/${id}`)
+    fetch('${API_BASE}/products/${id}')
       .then((res) => {
         if (res.status === 404) { setNotFound(true); setLoading(false); return null }
         if (!res.ok) throw new Error("Failed to fetch product")

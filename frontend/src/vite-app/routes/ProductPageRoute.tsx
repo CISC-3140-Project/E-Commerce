@@ -1,8 +1,7 @@
 import { useMemo } from "react"
 import { useParams } from "react-router-dom"
 import ProductPage from "@/app/products/[id]/page"
-import CheckoutButton from "../../components/checkoutButton" // Path adjusted to your screenshot
-
+import CheckoutButton from "@/src/components/CheckoutButton"
 export function ProductPageRoute() {
   const { id } = useParams()
 
@@ -11,6 +10,7 @@ export function ProductPageRoute() {
   // Logic to define what the user is buying based on the ID
   const cartItems = [
     { 
+      id: 'test124',
       name: `Product ID: ${id}`, 
       price: 25.00, // You can change this to a dynamic price later
       quantity: 1 

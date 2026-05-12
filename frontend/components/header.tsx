@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 import { ShoppingBag, Search, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -22,8 +22,11 @@ type StoredUser = { name: string; email: string; id: number }
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const [user, setUser] = useState<StoredUser | null>(null)
   const { totalItems } = useCart()
+  const navigate = useNavigate()
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const stored = localStorage.getItem("petopia_user")
@@ -160,15 +163,29 @@ export function Header() {
           <div className="mx-auto flex max-w-xl items-center gap-4">
             <Search className="h-5 w-5 text-muted-foreground" />
             <input
+              ref={inputRef}
               type="text"
-              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const q = searchQuery.trim()
+                  setIsSearchOpen(false)
+                  setSearchQuery("")
+                  navigate(q ? `/products?search=${encodeURIComponent(q)}` : "/products")
+                } else if (e.key === "Escape") {
+                  setIsSearchOpen(false)
+                  setSearchQuery("")
+                }
+              }}
+              placeholder="Search products... (press Enter)"
               className="flex-1 bg-transparent text-lg outline-none"
               autoFocus
             />
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsSearchOpen(false)}
+              onClick={() => { setIsSearchOpen(false); setSearchQuery("") }}
             >
               <X className="h-5 w-5" />
             </Button>
