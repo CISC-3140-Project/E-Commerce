@@ -102,7 +102,7 @@ Once the dependencies are installed, follow these steps to start the development
      ```
   If you are starting from the root of the project:
   * run:
-  * ```bash
+  ```bash
     cd frontend
     npm run dev
     ```
