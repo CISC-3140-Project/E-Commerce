@@ -30,7 +30,8 @@ Before you begin, ensure you have the following installed:
 * Click the "Code" button in this repository
 * Copy the SSH link
 * Go to your terminal
-  * Clone the repository and enter the directory: ```bash
+  * Clone the repository and enter the directory:
+    ```bash
     git clone git@github.com:CISC-3140-Project/E-Commerce.git
     cd E-Commerce
     ```
@@ -40,12 +41,13 @@ Before you begin, ensure you have the following installed:
   * Copy the contents of schema.sql and run the script to create the necessary tables.
 * **Populate the Shop (Optional but Recommended):**
 To see products in the store, run this SQL command after creating your tables:
-* ```sql
+ ```sql
 INSERT INTO products (name, price, description, category)
 VALUES 
 ('Classic Dog Leash', 15.99, 'Durable 6ft leash', 'Accessories'),
 ('Catnip Mouse Toy', 5.50, 'Hours of fun for your cat', 'Toys'),
-('Premium Bird Seed', 12.00, 'Nutritious mix for wild birds', 'Food');``` 
+('Premium Bird Seed', 12.00, 'Nutritious mix for wild birds', 'Food');
+``` 
 
 **Installing Dependencies:**
 To install it locally:
@@ -63,6 +65,7 @@ To install it locally:
     ```
 ### **Environment Variables Setup**
 The app requires specific keys to connect to the database and payment processor. Create a `.env` file in the `/backend` directories.
+
 **Backend (`/backend/.env`):**
 * ```env
   PORT=5001
@@ -97,7 +100,7 @@ Once the dependencies are installed, follow these steps to start the development
   * ```bash
     cd frontend
     npm run dev
-  ```
+    ```
 ***You should see:** Local: http://localhost:3000/ (or your configured port) Copy this link in your browser*
 
 ## Testing the Checkout
