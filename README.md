@@ -50,22 +50,25 @@ VALUES
 **Installing Dependencies:**
 To install it locally:
 1) **Frontend:**
-   * run: ```bash
-    cd frontend
-    npm install
+   * run:
+   ```bash
+   cd frontend
+   npm install
     ```
 2) **Backend:**
-   * run: ```bash
+   * run:
+   ```bash
     cd ../backend
     npm install
     ```
 ### **Environment Variables Setup**
 The app requires specific keys to connect to the database and payment processor. Create a `.env` file in the `/backend` directories.
 **Backend (`/backend/.env`):**
-* ```env PORT=5001
-DATABASE_URL=your_supabase_postgresql_connection_string
-STRIPE_SECRET_KEY=your_stripe_secret_key ```
-
+* ```env
+  PORT=5001
+  DATABASE_URL=your_supabase_postgresql_connection_string
+  STRIPE_SECRET_KEY=your_stripe_secret_key
+  ```
 **Note on Stripe Integration**
 The Stripe Public Key is currently hardcoded in frontend/src/components/Carts.jsx.
 * **To use your own Stripe account:**
@@ -75,23 +78,23 @@ The Stripe Public Key is currently hardcoded in frontend/src/components/Carts.js
 Once the dependencies are installed, follow these steps to start the development servers. Note: You will need two terminal windows open.
 * **Start the Backend:**
    If you are already in the backend directory:
-   * run: ```bash
-     npm run dev
-     ```
+   * run: ```bash npm run dev```
   If you are starting from the root of the project:
   * run: ```bash
     cd backend
-    npm run dev
-    ```
+    npm run dev ```
+    
 ***You should see:** Server is running on http://localhost:5001 (or your configured port)* 
 **In the second terminal:**
 * **Start the Frontend:**
    If you are already in the frontend directory:
-   * run: ```bash
+   * run:
+     ```bash
      npm run dev
      ```
   If you are starting from the root of the project:
-  * run: ```bash
+  * run:
+  * ```bash
     cd frontend
     npm run dev
   ```
