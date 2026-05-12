@@ -50,15 +50,16 @@ VALUES
 ``` 
 
 **Installing Dependencies:**
+
 To install it locally:
 1) **Frontend:**
-   * run:
+   run:
    ```bash
    cd frontend
    npm install
     ```
 2) **Backend:**
-   * run:
+   run:
    ```bash
     cd ../backend
     npm install
@@ -80,32 +81,33 @@ The Stripe Public Key is currently hardcoded in frontend/src/components/Carts.js
 ### Running the Project
 Once the dependencies are installed, follow these steps to start the development servers. Note: You will need two terminal windows open.
 * **Start the Backend:**
-   If you are already in the backend directory:
-   * run:
+   * If you are already in the backend directory:
+     run:
+      ```bash
+      npm run dev
+      ```
+  * If you are starting from the root of the project:
+    run:
      ```bash
+     cd backend
      npm run dev
-     ```
-  If you are starting from the root of the project:
-  * run:
-    ```bash
-    cd backend
-    npm run dev
-    ```
-    
+     ```    
 ***You should see:** Server is running on http://localhost:5001 (or your configured port)* 
+
 **In the second terminal:**
+
 * **Start the Frontend:**
-   If you are already in the frontend directory:
-   * run:
-     ```bash
-     npm run dev
-     ```
-  If you are starting from the root of the project:
-  * run:
-  ```bash
-    cd frontend
-    npm run dev
-    ```
+   * If you are already in the frontend directory:
+     run:
+      ```bash
+      npm run dev
+      ```
+   * If you are starting from the root of the project
+     run:
+      ```bash
+      cd frontend
+      npm run dev
+      ```
 ***You should see:** Local: http://localhost:3000/ (or your configured port) Copy this link in your browser*
 
 ## Testing the Checkout
