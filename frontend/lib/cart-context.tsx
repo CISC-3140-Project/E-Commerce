@@ -64,11 +64,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const checkout = async () => {
     try {
       const stripe = await stripePromise;
-      
+
       const response = await fetch('http://localhost:5001/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }), 
+        body: JSON.stringify({ items }),
       });
 
       const session = await response.json();
