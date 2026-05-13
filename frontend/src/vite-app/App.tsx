@@ -8,13 +8,13 @@ import "@/app/globals.css"
 import HomePage from "@/app/page"
 import AboutPage from "@/app/about/page"
 import ProductsPage from "@/app/products/page"
+import ProductPage from "@/app/products/[id]/page"
 import CartPage from "@/app/cart/page"
 import SuccessPage from "./routes/Success"
 import LoginPage from "@/app/login/page"
 import AccountPage from "@/app/account/page"
 import OrdersPage from "@/app/orders/page"
-import { ProductPageRoute } from "./routes/ProductPageRoute"
-import { OrderDetailRoute } from "./routes/OrderDetailRoute"
+import OrderDetailPage from "@/app/orders/[id]/page"
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -35,13 +35,13 @@ export function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/products" element={<ProductsPage />} />
-            <Route path="/products/:id" element={<ProductPageRoute />} />
+            <Route path="/products/:id" element={<ProductPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/success" element={<SuccessPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/orders/:id" element={<OrderDetailRoute />} />
+            <Route path="/orders/:id" element={<OrderDetailPage />} />
           </Routes>
         </main>
         <Footer />

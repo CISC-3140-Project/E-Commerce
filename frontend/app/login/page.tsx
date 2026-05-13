@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { Eye, EyeOff, ArrowLeft } from "lucide-react"
 import { API_BASE } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -91,7 +91,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Back link */}
         <Link
-          href="/"
+          to="/"
           className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -102,7 +102,7 @@ export default function LoginPage() {
         <div className="rounded-lg border border-border bg-card p-8 shadow-sm">
           {/* Brand */}
           <div className="mb-8 text-center">
-            <Link href="/">
+            <Link to="/">
               <span className="font-serif text-3xl font-semibold tracking-tight">Petopia</span>
             </Link>
             <p className="mt-2 text-sm text-muted-foreground">

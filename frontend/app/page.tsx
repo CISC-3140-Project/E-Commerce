@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState, useMemo } from "react"
-import Link from "next/link"
-import Image from "next/image"
+import { Link } from "react-router-dom"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/product-card"
@@ -57,7 +56,7 @@ export default function HomePage() {
                 Discover our curated collection of premium pet products, designed with love and made to last.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Link href="/products">
+                <Link to="/products">
                   <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                     Shop Collection
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -66,13 +65,11 @@ export default function HomePage() {
               </div>
             </div>
             <div className="relative aspect-square lg:aspect-[4/5]">
-              <Image
+              <img
                 src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80"
                 alt="Happy dog with premium products"
-                fill
-                className="rounded-lg object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="h-full w-full rounded-lg object-cover"
+                loading="eager"
               />
             </div>
           </div>
@@ -94,7 +91,7 @@ export default function HomePage() {
             {categories.map((category) => (
               <Link
                 key={category.slug}
-                href={`/products?category=${category.slug}`}
+                to={`/products?category=${category.slug}`}
                 className="group relative flex flex-col items-center justify-center rounded-lg border border-border bg-card p-8 text-center transition-all hover:border-primary hover:shadow-lg"
               >
                 <h3 className="text-lg font-medium">{category.name}</h3>
@@ -121,7 +118,7 @@ export default function HomePage() {
               </p>
             </div>
             <Link
-              href="/products"
+              to="/products"
               className="hidden items-center gap-2 text-sm font-medium transition-colors hover:text-primary sm:flex"
             >
               View All
@@ -144,7 +141,7 @@ export default function HomePage() {
           )}
 
           <div className="mt-8 text-center sm:hidden">
-            <Link href="/products">
+            <Link to="/products">
               <Button variant="outline">
                 View All Products
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -205,7 +202,7 @@ export default function HomePage() {
           <p className="mt-4 text-lg text-primary-foreground/80">
             Join thousands of happy pet parents who trust Petopia for their furry family members.
           </p>
-          <Link href="/products" className="mt-8 inline-block">
+          <Link to="/products" className="mt-8 inline-block">
             <Button size="lg" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
               Start Shopping
               <ArrowRight className="ml-2 h-4 w-4" />

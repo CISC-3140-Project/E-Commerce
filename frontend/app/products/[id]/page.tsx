@@ -1,8 +1,7 @@
 "use client"
 
-import { use, useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
+import { useState, useEffect } from "react"
+import { Link, useParams } from "react-router-dom"
 import { Star, Minus, Plus, Truck, ShieldCheck, RotateCcw, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,12 +11,8 @@ import { mapApiProduct, type ApiProduct, type Product } from "@/lib/products"
 import { useCart } from "@/lib/cart-context"
 import { API_BASE } from "@/lib/utils"
 
-interface ProductPageProps {
-  params: Promise<{ id: string }>
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
-  const { id } = use(params)
+export default function ProductPage() {
+  const { id = "" } = useParams()
   const { addItem } = useCart()
 
   const [product, setProduct]               = useState<Product | null>(null)
@@ -89,7 +84,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     return (
       <div className="min-h-screen py-20 text-center">
         <h1 className="font-serif text-3xl font-semibold">Product not found</h1>
-        <Link href="/products" className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/products" className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="h-4 w-4" />
           Back to Products
         </Link>
@@ -103,7 +98,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         {/* Breadcrumb */}
         <nav className="mb-8">
           <Link
-            href="/products"
+            to="/products"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -116,13 +111,11 @@ export default function ProductPage({ params }: ProductPageProps) {
           {/* Image */}
           <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
             {product.image ? (
-              <Image
+              <img
                 src={product.image}
                 alt={product.name}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="h-full w-full object-cover"
+                loading="eager"
               />
             ) : (
               <div className="h-full w-full bg-secondary" />

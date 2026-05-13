@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { User, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -199,7 +199,7 @@ function OrdersSection({ token }: { token: string }) {
         <div className="rounded-lg border border-border bg-card p-12 text-center">
           <Package className="mx-auto h-10 w-10 text-muted-foreground" />
           <p className="mt-4 text-muted-foreground">No orders yet</p>
-          <Link href="/products" className="mt-2 inline-block text-sm font-medium hover:text-accent">
+          <Link to="/products" className="mt-2 inline-block text-sm font-medium hover:text-accent">
             Start shopping →
           </Link>
         </div>
@@ -221,7 +221,7 @@ function OrdersSection({ token }: { token: string }) {
             </div>
             <div className="flex flex-col items-end gap-3 shrink-0">
               <OrderStatusBadge status={order.status} />
-              <Link href={`/orders/${order.id}`} className="text-xs font-medium hover:text-accent">
+              <Link to={`/orders/${order.id}`} className="text-xs font-medium hover:text-accent">
                 View details →
               </Link>
             </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
+import { Link, useParams } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import { API_BASE, formatDate } from "@/lib/utils"
 import { useRequireAuth } from "@/lib/use-require-auth"
@@ -21,16 +21,12 @@ type Order = {
   items: OrderItem[]
 }
 
-export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function OrderDetailPage() {
   const token = useRequireAuth()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [orderId, setOrderId] = useState<string | null>(null)
-
-  useEffect(() => {
-    params.then((p) => setOrderId(p.id))
-  }, [params])
+  const { id: orderId } = useParams()
 
   useEffect(() => {
     if (!token || !orderId) return
@@ -53,7 +49,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     <div className="min-h-screen bg-secondary">
       <div className="mx-auto max-w-2xl px-4 py-16 lg:px-8">
         <Link
-          href="/orders"
+          to="/orders"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />

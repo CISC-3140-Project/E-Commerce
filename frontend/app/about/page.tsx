@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { Heart, ShieldCheck, Truck } from "lucide-react"
 
 const highlights = [
@@ -57,10 +57,10 @@ export default function AboutPage() {
             <li>Manage account information from your profile.</li>
           </ul>
           <div className="mt-5 flex flex-wrap gap-4 text-sm font-medium">
-            <Link href="/products" className="hover:text-accent">
+            <Link to="/products" className="hover:text-accent">
               Start shopping →
             </Link>
-            <Link href="/account?section=orders" className="hover:text-accent">
+            <Link to="/account?section=orders" className="hover:text-accent">
               View your orders →
             </Link>
           </div>

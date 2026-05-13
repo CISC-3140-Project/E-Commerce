@@ -1,7 +1,6 @@
 "use client"
 
-import Image from "next/image"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -27,14 +26,13 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Link href={`/products/${product.id}`} className="group block">
+    <Link to={`/products/${product.id}`} className="group block">
       <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-        <Image
+        <img
           src={product.image}
           alt={product.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
         />
         {product.badge && (
           <Badge 

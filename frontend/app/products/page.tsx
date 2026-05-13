@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams } from "react-router-dom"
 import { SlidersHorizontal, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -49,7 +49,7 @@ const sortOptions = [
 ]
 
 export default function ProductsPage() {
-  const searchParams = useSearchParams()
+  const [searchParams] = useSearchParams()
   const initialCategory = searchParams.get("category") || ""
   const initialPet      = searchParams.get("pet")      || ""
   const initialSearch   = searchParams.get("search")   || ""

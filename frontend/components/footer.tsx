@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -56,7 +56,7 @@ export function Footer() {
                 {footerLinks.shop.map((link) => (
                   <li key={link.name}>
                     <Link
-                      href={link.href}
+                      to={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.name}
@@ -71,7 +71,7 @@ export function Footer() {
                 {footerLinks.support.map((link) => (
                   <li key={link.name}>
                     <Link
-                      href={link.href}
+                      to={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.name}
@@ -86,7 +86,7 @@ export function Footer() {
                 {footerLinks.company.map((link) => (
                   <li key={link.name}>
                     <Link
-                      href={link.href}
+                      to={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.name}
@@ -100,7 +100,7 @@ export function Footer() {
 
         {/* Bottom section */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 lg:flex-row">
-          <Link href="/" className="font-serif text-xl font-semibold">
+          <Link to="/" className="font-serif text-xl font-semibold">
             Petopia
           </Link>
           <p className="text-sm text-muted-foreground">

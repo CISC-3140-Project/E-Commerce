@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 import { ArrowRight, Package } from "lucide-react"
 import { API_BASE, formatDate } from "@/lib/utils"
 import { useRequireAuth } from "@/lib/use-require-auth"
@@ -65,7 +65,7 @@ export default function OrdersPage() {
                 When you place an order it will show up here.
               </p>
               <Link
-                href="/products"
+                to="/products"
                 className="mt-6 inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-accent"
               >
                 Start shopping
@@ -91,7 +91,7 @@ export default function OrdersPage() {
                 <div className="flex flex-col items-end gap-3 shrink-0">
                   <OrderStatusBadge status={order.status} />
                   <Link
-                    href={`/orders/${order.id}`}
+                    to={`/orders/${order.id}`}
                     className="inline-flex items-center gap-1 text-xs font-medium transition-colors hover:text-accent"
                   >
                     View details
