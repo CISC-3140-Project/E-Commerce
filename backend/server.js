@@ -12,9 +12,20 @@ const PORT = process.env.PORT || 5001;
 const JWT_SECRET = process.env.JWT_SECRET || "petopia-secret-change-in-production";
 
 // --- Middleware ---
+const allowedOrigins = [
+  "https://e-commerce-rho-nine-84.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+];
+
 app.use(
   cors({
-    origin: "*",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
