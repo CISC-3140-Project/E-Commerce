@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer"
 import "@/app/globals.css"
 
 import HomePage from "@/app/page"
+import AboutPage from "@/app/about/page"
 import ProductsPage from "@/app/products/page"
 import CartPage from "@/app/cart/page"
 import SuccessPage from "./routes/Success"
@@ -32,6 +33,7 @@ export function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/products/:id" element={<ProductPageRoute />} />
             <Route path="/cart" element={<CartPage />} />
