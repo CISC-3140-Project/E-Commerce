@@ -114,6 +114,88 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+// --- Account Routes ---
+app.get("/api/account/profile", requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, name, email, created_at FROM users WHERE id = $1",
+      [req.user.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Fetch Profile Error:", error);
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
+});
+
+app.put("/api/account/email", requireAuth, async (req, res) => {
+  const { email, currentPassword } = req.body;
+  if (!email || !currentPassword) {
+    return res.status(400).json({ error: "Email and current password are required" });
+  }
+
+  try {
+    const currentUser = await pool.query("SELECT id, password FROM users WHERE id = $1", [req.user.userId]);
+    if (currentUser.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const passwordOk = await bcrypt.compare(currentPassword, currentUser.rows[0].password);
+    if (!passwordOk) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    const emailTaken = await pool.query("SELECT id FROM users WHERE email = $1 AND id <> $2", [
+      email,
+      req.user.userId,
+    ]);
+    if (emailTaken.rows.length > 0) {
+      return res.status(409).json({ error: "An account with that email already exists" });
+    }
+
+    await pool.query("UPDATE users SET email = $1 WHERE id = $2", [email, req.user.userId]);
+    res.json({ message: "Email updated successfully" });
+  } catch (error) {
+    console.error("Update Email Error:", error);
+    res.status(500).json({ error: "Failed to update email" });
+  }
+});
+
+app.put("/api/account/password", requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "Current and new password are required" });
+  }
+
+  if (String(newPassword).length < 8) {
+    return res.status(400).json({ error: "New password must be at least 8 characters" });
+  }
+
+  try {
+    const currentUser = await pool.query("SELECT id, password FROM users WHERE id = $1", [req.user.userId]);
+    if (currentUser.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const passwordOk = await bcrypt.compare(currentPassword, currentUser.rows[0].password);
+    if (!passwordOk) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await pool.query("UPDATE users SET password = $1 WHERE id = $2", [newHash, req.user.userId]);
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Update Password Error:", error);
+    res.status(500).json({ error: "Failed to update password" });
+  }
+});
+
 // --- Product Routes ---
 app.get("/api/products", async (req, res) => {
   try {

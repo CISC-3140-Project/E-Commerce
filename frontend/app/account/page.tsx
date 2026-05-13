@@ -34,6 +34,7 @@ const navItems = [
 
 function ProfileSection({ token }: { token: string }) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [profileError, setProfileError] = useState("")
 
   const [newEmail, setNewEmail]           = useState("")
   const [emailPassword, setEmailPassword] = useState("")
@@ -52,7 +53,11 @@ function ProfileSection({ token }: { token: string }) {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())
-      .then((data) => { if (!data.error) setProfile(data) })
+      .then((data) => {
+        if (data.error) setProfileError(data.error)
+        else setProfile(data)
+      })
+      .catch(() => setProfileError("Could not load account information."))
   }, [token])
 
   async function handleEmailChange(e: React.FormEvent) {
@@ -118,6 +123,8 @@ function ProfileSection({ token }: { token: string }) {
               <dd className="mt-1 text-sm">{formatDate(profile.created_at)}</dd>
             </div>
           </dl>
+        ) : profileError ? (
+          <p className="mt-4 text-sm text-destructive">{profileError}</p>
         ) : (
           <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
         )}
