@@ -39,14 +39,24 @@ export function App() {
 
   const handleCheckout = async (product: Product) => {
     try {
+      const token = localStorage.getItem("petopia_token");
+      if (!token) {
+        alert("Please log in to complete checkout.");
+        return;
+      }
+
       const response = await fetch(
         "http://localhost:5001/api/create-checkout-session",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({
             items: [
               {
+                id: product.id,
                 name: product.name,
                 price: parseFloat(product.price),
                 quantity: 1,

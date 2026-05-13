@@ -1,9 +1,6 @@
 "use client"
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
-import { loadStripe } from "@stripe/stripe-js"
-
-const stripePromise = loadStripe('pk_test_51TVGgrB0aHIC1xqc7WbNlDCjXzlnmNO1y76RWiYyWXHGWgiVZkSpO1JVXDqEYYipxVA4DZatn9l6ehjLbhA81rJr00n4w9pg6j');
 
 export interface CartItem {
   id: string
@@ -63,11 +60,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // --- STRIPE CHECKOUT LOGIC ---
   const checkout = async () => {
     try {
-      const stripe = await stripePromise;
+      const token = localStorage.getItem("petopia_token");
+      if (!token) {
+        alert("Please log in to complete checkout.");
+        return;
+      }
 
       const response = await fetch('http://localhost:5001/api/create-checkout-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ items }),
       });
 
@@ -75,13 +79,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       if (session.error) throw new Error(session.error);
 
-      if (stripe) {
-        // We use 'as any' to bypass the TypeScript error you encountered
-        const { error } = await (stripe as any).redirectToCheckout({
-          sessionId: session.id,
-        });
-        if (error) console.error("Stripe error:", error);
-      }
+      if (session.url) window.location.href = session.url;
     } catch (err) {
       console.error("Checkout failed:", err);
       alert("Payment system is currently unavailable. Please check your backend connection.");

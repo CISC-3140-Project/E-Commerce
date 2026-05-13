@@ -186,6 +186,7 @@ app.get("/api/orders", requireAuth, async (req, res) => {
     const result = await pool.query(
       `SELECT o.id, o.total_price, o.status, o.created_at,
               json_agg(json_build_object(
+                'product_id', oi.product_id,
                 'name', p.name,
                 'quantity', oi.quantity,
                 'price', oi.price
@@ -205,12 +206,74 @@ app.get("/api/orders", requireAuth, async (req, res) => {
   }
 });
 
+app.get("/api/orders/:id", requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT o.id, o.total_price, o.status, o.created_at,
+              COALESCE(
+                json_agg(
+                  json_build_object(
+                    'product_id', oi.product_id,
+                    'name', p.name,
+                    'category', p.category,
+                    'image', p.image,
+                    'quantity', oi.quantity,
+                    'price', oi.price
+                  ) ORDER BY oi.id
+                ) FILTER (WHERE oi.id IS NOT NULL),
+                '[]'::json
+              ) AS items
+       FROM orders o
+       LEFT JOIN order_items oi ON oi.order_id = o.id
+       LEFT JOIN products p ON p.id = oi.product_id
+       WHERE o.user_id = $1 AND o.id = $2
+       GROUP BY o.id`,
+      [req.user.userId, req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Fetch Order Detail Error:", error);
+    res.status(500).json({ error: "Failed to fetch order details" });
+  }
+});
+
 // --- Stripe Checkout Route ---
-app.post("/api/create-checkout-session", async (req, res) => {
+app.post("/api/create-checkout-session", requireAuth, async (req, res) => {
+  const client = await pool.connect();
   try {
     const { items } = req.body;
-    if (!items || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "No items in cart" });
+    }
+
+    const invalidItem = items.find((item) => !item.id || !item.price || !item.quantity);
+    if (invalidItem) {
+      return res.status(400).json({ error: "Each item must include id, price, and quantity" });
+    }
+
+    const totalPrice = items.reduce(
+      (sum, item) => sum + parseFloat(item.price) * Number(item.quantity || 1),
+      0
+    );
+
+    await client.query("BEGIN");
+
+    const orderResult = await client.query(
+      "INSERT INTO orders (user_id, total_price, status) VALUES ($1, $2, $3) RETURNING id",
+      [req.user.userId, totalPrice.toFixed(2), "pending"]
+    );
+    const orderId = orderResult.rows[0].id;
+
+    for (const item of items) {
+      await client.query(
+        "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
+        [orderId, parseInt(item.productId || item.id), item.quantity, item.price]
+      );
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -224,14 +287,57 @@ app.post("/api/create-checkout-session", async (req, res) => {
         quantity: item.quantity || 1,
       })),
       mode: "payment",
-      success_url: "http://localhost:3000/success",
+      client_reference_id: String(orderId),
+      metadata: {
+        order_id: String(orderId),
+        user_id: String(req.user.userId),
+      },
+      success_url: "http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "http://localhost:3000/cart",
     });
 
-    res.json({ url: session.url });
+    await client.query("COMMIT");
+    res.json({ url: session.url, id: session.id, orderId });
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error("Stripe Error:", error);
     res.status(500).json({ error: error.message });
+  } finally {
+    client.release();
+  }
+});
+
+app.post("/api/stripe/confirm-session", requireAuth, async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    if (!sessionId) {
+      return res.status(400).json({ error: "sessionId is required" });
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const orderId = Number(session.client_reference_id || session.metadata?.order_id);
+
+    if (!orderId) {
+      return res.status(400).json({ error: "No order linked to this Stripe session" });
+    }
+
+    if (session.payment_status !== "paid") {
+      return res.status(400).json({ error: "Payment has not been completed" });
+    }
+
+    const result = await pool.query(
+      "UPDATE orders SET status = $1 WHERE id = $2 AND user_id = $3 RETURNING id, status",
+      ["processed", orderId, req.user.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Order not found for this user" });
+    }
+
+    res.json({ orderId: result.rows[0].id, status: result.rows[0].status });
+  } catch (error) {
+    console.error("Stripe confirm error:", error);
+    res.status(500).json({ error: "Failed to confirm payment session" });
   }
 });
 

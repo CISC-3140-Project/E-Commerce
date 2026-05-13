@@ -8,7 +8,10 @@ import { useRequireAuth } from "@/lib/use-require-auth"
 import { OrderStatusBadge } from "@/components/order-status-badge"
 
 type OrderItem = {
-  name: string
+  product_id: number
+  name: string | null
+  category: string | null
+  image: string | null
   quantity: number
   price: string
 }
@@ -79,7 +82,9 @@ export default function OrderDetailPage() {
               {order.items.map((item, i) => (
                 <div key={i} className="flex items-center justify-between text-sm">
                   <span>
-                    {item.name}
+                    <Link to={`/products/${item.product_id}`} className="hover:underline">
+                      {item.name || `Product #${item.product_id}`}
+                    </Link>
                     <span className="ml-2 text-muted-foreground">× {item.quantity}</span>
                   </span>
                   <span>${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>

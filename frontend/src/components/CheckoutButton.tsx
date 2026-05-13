@@ -19,13 +19,20 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({ items }) => {
       return;
     }
 
+    const token = localStorage.getItem("petopia_token");
+    if (!token) {
+      alert("Please log in to complete checkout.");
+      return;
+    }
+
     console.log("Sending items to backend:", items);
 
     try {
       const response = await fetch('http://localhost:5001/api/create-checkout-session', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json' 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ items }),
       });
